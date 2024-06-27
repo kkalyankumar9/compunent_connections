@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const taskRouter = require("./route/taskRouter");
+const pool = require("./db");
 require("dotenv").config(); 
 
 const app = express();
@@ -14,4 +15,5 @@ app.use("/api",taskRouter)
 
 app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}`);
+    
 });
