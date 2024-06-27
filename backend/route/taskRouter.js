@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../db'); 
+const pool = require('../db'); 
 const taskRouter = express.Router();
 
 
@@ -7,7 +7,7 @@ const taskRouter = express.Router();
 // Route to get all tasks
 taskRouter.get('/tasks', async (req, res) => {
     try {
-        const [tasks] = await db.query('SELECT * FROM tasks');
+        const [tasks] = await pool.query('SELECT * FROM tasks');
         res.json(tasks);
     } catch (err) {
         console.error('Error fetching tasks:', err.message);
@@ -22,8 +22,8 @@ taskRouter.post('/tasks', async (req, res) => {
         return res.status(400).json({ error: 'Title is required' });
     }
     try {
-        const [result] = await db.query('INSERT INTO tasks (title, description) VALUES (?, ?)', [title, description]);
-        const [task] = await db.query('SELECT * FROM tasks WHERE id = ?', [result.insertId]);
+        const [result] = await pool.query('INSERT INTO tasks (title, description) VALUES (?, ?)', [title, description]);
+        const [task] = await pool.query('SELECT * FROM tasks WHERE id = ?', [result.insertId]);
         res.status(201).json(task[0]);
     } catch (err) {
         console.error('Error adding task:', err.message);
@@ -39,11 +39,11 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
         return res.status(400).json({ error: 'At least one field (title, description, status) is required' });
     }
     try {
-        const [result] = await db.query('UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?', [title, description, status, id]);
+        const [result] = await pool.query('UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?', [title, description, status, id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Task not found' });
         }
-        const [task] = await db.query('SELECT * FROM tasks WHERE id = ?', [id]);
+        const [task] = await pool.query('SELECT * FROM tasks WHERE id = ?', [id]);
         res.json({ message: 'Task updated successfully', task: task[0] });
     } catch (err) {
         console.error('Error updating task:', err.message);
@@ -55,7 +55,7 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
 taskRouter.delete('/tasks/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const [result] = await db.query('DELETE FROM tasks WHERE id = ?', [id]);
+        const [result] = await pool.query('DELETE FROM tasks WHERE id = ?', [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Task not found' });
         }
