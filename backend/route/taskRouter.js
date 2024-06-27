@@ -1,17 +1,21 @@
 const express = require('express');
-const db = require('../db');
+const db = require('../db'); 
 const taskRouter = express.Router();
 
-// Get all tasks
+
+
+// Route to get all tasks
 taskRouter.get('/tasks', async (req, res) => {
     try {
         const [tasks] = await db.query('SELECT * FROM tasks');
         res.json(tasks);
     } catch (err) {
+        console.error('Error fetching tasks:', err.message);
         res.status(500).json({ error: 'Database query failed', message: err.message });
     }
 });
-// add a task
+
+// Route to add a task
 taskRouter.post('/tasks', async (req, res) => {
     const { title, description } = req.body;
     if (!title) {
@@ -22,11 +26,12 @@ taskRouter.post('/tasks', async (req, res) => {
         const [task] = await db.query('SELECT * FROM tasks WHERE id = ?', [result.insertId]);
         res.status(201).json(task[0]);
     } catch (err) {
+        console.error('Error adding task:', err.message);
         res.status(500).json({ error: 'Database query failed', message: err.message });
     }
 });
 
-// Update a task
+// Route to update a task
 taskRouter.patch('/tasks/:id', async (req, res) => {
     const { id } = req.params;
     const { title, description, status } = req.body;
@@ -41,11 +46,12 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
         const [task] = await db.query('SELECT * FROM tasks WHERE id = ?', [id]);
         res.json({ message: 'Task updated successfully', task: task[0] });
     } catch (err) {
+        console.error('Error updating task:', err.message);
         res.status(500).json({ error: 'Database query failed', message: err.message });
     }
 });
 
-// Delete a task
+// Route to delete a task
 taskRouter.delete('/tasks/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -55,6 +61,7 @@ taskRouter.delete('/tasks/:id', async (req, res) => {
         }
         res.status(204).json({ message: 'Task deleted successfully' });
     } catch (err) {
+        console.error('Error deleting task:', err.message);
         res.status(500).json({ error: 'Database query failed', message: err.message });
     }
 });
