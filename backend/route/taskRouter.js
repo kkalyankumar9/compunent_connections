@@ -18,12 +18,12 @@ taskRouter.get('/tasks', async (req, res) => {
 
 // Route to add a task
 taskRouter.post('/tasks', async (req, res) => {
-    const { title, description } = req.body;
+    const { title, description ,status} = req.body;
     if (!title) {
         return res.status(400).json({ error: 'Title is required' });
     }
     try {
-        const [result] = await pool.query('INSERT INTO taskslist (title, description) VALUES (?, ?)', [title, description]);
+        const [result] = await pool.query('INSERT INTO taskslist (title, description,status) VALUES (?, ?,?)', [title, description,status]);
         const [task] = await pool.query('SELECT * FROM taskslist WHERE id = ?', [result.insertId]);
         res.status(201).json(task[0]);
     } catch (err) {
