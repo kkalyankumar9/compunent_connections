@@ -1,7 +1,7 @@
 const express = require('express');
 
 
-app.use(cors())
+const cors = require('cors')
 const ensureTable = require('./middleware.js/ensureTable');
 const taskRouter = require('./route/taskRouter');
 
