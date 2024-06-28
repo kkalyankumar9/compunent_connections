@@ -7,7 +7,7 @@ npm run start
 ## Backend 
 npm run server
 
-This application is only working locally due to some backend deployment issues.
+This application is currently only working locally. Since I am more experienced with MongoDB than MySQL, I explored MySQL for this assignment.
 
 ![alt text](image.png)
 
