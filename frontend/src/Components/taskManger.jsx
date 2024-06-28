@@ -12,9 +12,10 @@ const TaskManager = () => {
   }, []);
 
   const fetchTasks = () => {
-    axios.get('https://compunent-connections-server.onrender.com/tasks')
+    axios.get('http://localhost:8080/api/tasks')
       .then(response => {
         setTasks(response.data);
+        console.log(response.data)
       })
       .catch(error => {
         console.error('Error fetching tasks:', error);
