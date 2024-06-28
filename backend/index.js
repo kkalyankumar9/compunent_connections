@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require("cors");
 const ensureTable = require('./middleware.js/ensureTable');
 const taskRouter = require('./route/taskRouter');
-const database = require('./db');
+
 
 require('dotenv').config();
 
@@ -22,14 +22,8 @@ app.get('/', (req, res) => {
 });
 
 
-database.authenticate()
-  .then(() => {
-    console.log('Successfully connected to the database');
+
 
     app.listen(port, () => {
       console.log(`Server is running at port ${port}`);
     });
-  })
-  .catch((err) => {
-    console.error('Unable to connect to the database:', err);
-  });
