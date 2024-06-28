@@ -4,7 +4,6 @@ npm run start
 ## Backend 
 npm run server
 
-This application is only working locally due to some backend deployment issues.
 
 
 ## Tech stack
