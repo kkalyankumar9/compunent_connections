@@ -1,11 +1,12 @@
 const express = require('express');
 const database = require('../db');
+const { QueryTypes } = require('sequelize');
 const taskRouter = express.Router();
 
 // Route to get all tasks
 taskRouter.get('/tasks', async (req, res) => {
   try {
-    const tasks = await database.query('SELECT * FROM taskslist', { type: database.QueryTypes.SELECT });
+    const tasks = await database.query('SELECT * FROM taskslist', { type: QueryTypes.SELECT });
     res.json(tasks);
   } catch (err) {
     console.error('Error fetching tasks:', err.message);
@@ -15,20 +16,20 @@ taskRouter.get('/tasks', async (req, res) => {
 
 // Route to add a task
 taskRouter.post('/tasks', async (req, res) => {
-  const { title, description,status } = req.body;
+  const { title, description, status } = req.body;
   if (!title) {
     return res.status(400).json({ error: 'Title is required' });
   }
 
   try {
-    const result = await database.query('INSERT INTO taskslist (title, description,status) VALUES (?, ?, ?)', {
-      replacements: [title, description,status],
-      type: database.QueryTypes.INSERT,
+    const result = await database.query('INSERT INTO taskslist (title, description, status) VALUES (?, ?, ?)', {
+      replacements: [title, description, status],
+      type: QueryTypes.INSERT,
     });
     const taskId = result[0];
     const task = await database.query('SELECT * FROM taskslist WHERE id = ?', {
       replacements: [taskId],
-      type: database.QueryTypes.SELECT,
+      type: QueryTypes.SELECT,
     });
     res.status(201).json(task[0]);
   } catch (err) {
@@ -42,33 +43,25 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { title, description, status } = req.body;
 
-  if (!title && !description && !status) {
+  const updates = [];
+  if (title) updates.push({ key: 'title', value: title });
+  if (description) updates.push({ key: 'description', value: description });
+  if (status) updates.push({ key: 'status', value: status });
+
+  if (updates.length === 0) {
     return res.status(400).json({ error: 'At least one field (title, description, status) is required' });
   }
 
-  const fieldsToUpdate = [];
-  const replacements = [];
-
-  if (title) {
-    fieldsToUpdate.push('title = ?');
-    replacements.push(title);
-  }
-
-  if (description) {
-    fieldsToUpdate.push('description = ?');
-    replacements.push(description);
-  }
-
-  if (status) {
-    fieldsToUpdate.push('status = ?');
-    replacements.push(status);
-  }
-
-  replacements.push(id);
+  const updateFields = updates.map(u => `${u.key} = ?`).join(', ');
+  const updateValues = updates.map(u => u.value);
+  updateValues.push(id);
 
   try {
-    const query = `UPDATE taskslist SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
-    const result = await database.query(query, { replacements, type: database.QueryTypes.UPDATE });
+    const query = `UPDATE taskslist SET ${updateFields} WHERE id = ?`;
+    const result = await database.query(query, {
+      replacements: updateValues,
+      type: QueryTypes.UPDATE,
+    });
 
     if (result[0].affectedRows === 0) {
       return res.status(404).json({ error: 'Task not found' });
@@ -76,7 +69,7 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
 
     const task = await database.query('SELECT * FROM taskslist WHERE id = ?', {
       replacements: [id],
-      type: database.QueryTypes.SELECT,
+      type: QueryTypes.SELECT,
     });
 
     res.json({ message: 'Task updated successfully', task: task[0] });
@@ -86,24 +79,17 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
   }
 });
 
-
+// Route to delete a task
 taskRouter.delete('/tasks/:id', async (req, res) => {
   const { id } = req.params;
-  const userId = +id; 
-  console.log(userId);
 
   try {
-   
-    const [result] = await database.query('DELETE FROM taskslist WHERE id = ?', {
-      replacements: [userId],
-      type: database.QueryTypes.DELETE,
+    const result = await database.query('DELETE FROM taskslist WHERE id = ?', {
+      replacements: [id],
+      type: QueryTypes.DELETE,
     });
 
-    
-    console.log('Delete result:', result);
-
-    
-    if (result.affectedRows === 0) {
+    if (result[0].affectedRows === 0) {
       return res.status(404).json({ error: 'Task not found' });
     }
 
@@ -114,6 +100,4 @@ taskRouter.delete('/tasks/:id', async (req, res) => {
   }
 });
 
-  
-  module.exports = taskRouter;
-  
+module.exports = taskRouter;

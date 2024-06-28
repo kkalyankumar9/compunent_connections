@@ -1,4 +1,3 @@
-// src/components/TaskManager.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -12,10 +11,9 @@ const TaskManager = () => {
   }, []);
 
   const fetchTasks = () => {
-    axios.get('http://localhost:8080/api/tasks')
+    axios.get('http://localhost:8000/tasks')
       .then(response => {
         setTasks(response.data);
-        console.log(response.data)
       })
       .catch(error => {
         console.error('Error fetching tasks:', error);
@@ -24,7 +22,7 @@ const TaskManager = () => {
 
   const addTask = () => {
     if (!newTask.title || !newTask.status) return;
-    axios.post('http://localhost:8080/api/tasks', newTask)
+    axios.post('http://localhost:8000/tasks', newTask)
       .then(response => {
         setTasks([...tasks, response.data]);
         setNewTask({ title: '', description: '', status: '' });
@@ -34,11 +32,14 @@ const TaskManager = () => {
       });
   };
 
-  const updateTask = (id, updatedTask) => {
-    axios.patch(`http://localhost:8080/api/tasks/${id}`, updatedTask)
-      .then(() => {
-        setTasks(tasks.map(task => task.id === id ? { ...task, ...updatedTask } : task));
-        setEditTask(null); // Clear edit mode after update
+  const updateTask = () => {
+    if (!newTask.title || !newTask.status) return;
+    axios.patch(`http://localhost:8000/tasks/${editTask.id}`, newTask)
+      .then(response => {
+        setTasks(tasks.map(task => task.id === editTask.id ? response.data : task));
+        cancelEdit();
+        window.alert('Task updated successfully!');
+        window.location.reload();
       })
       .catch(error => {
         console.error('Error updating task:', error);
@@ -46,9 +47,11 @@ const TaskManager = () => {
   };
 
   const deleteTask = (id) => {
-    axios.delete(`http://localhost:8080/api/tasks/${id}`)
+    axios.delete(`http://localhost:8000/tasks/${id}`)
       .then(() => {
         setTasks(tasks.filter(task => task.id !== id));
+        window.alert('Task deleted successfully!');
+        window.location.reload();
       })
       .catch(error => {
         console.error('Error deleting task:', error);
@@ -57,7 +60,7 @@ const TaskManager = () => {
 
   const startEdit = (task) => {
     setEditTask(task);
-    setNewTask({ title: task.title, description: task.description, status: task.status });
+    setNewTask({ ...task }); // Initialize the form fields with the task data
   };
 
   const cancelEdit = () => {
@@ -86,7 +89,8 @@ const TaskManager = () => {
         <select
           value={newTask.status}
           onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
-          className="border p-2 mb-2 md:mr-2 md:mb-0">
+          className="border p-2 mb-2 md:mr-2 md:mb-0"
+        >
           <option value="">Select status</option>
           <option value="Yet to Start">Yet to Start</option>
           <option value="completed">Completed</option>
@@ -94,7 +98,7 @@ const TaskManager = () => {
         </select>
         {editTask ? (
           <>
-            <button onClick={() => updateTask(editTask.id, newTask)} className="bg-blue-500 text-white p-2 mb-2 md:mr-2 md:mb-0">Update</button>
+            <button onClick={updateTask} className="bg-blue-500 text-white p-2 mb-2 md:mr-2 md:mb-0">Save</button>
             <button onClick={cancelEdit} className="bg-gray-400 text-white p-2">Cancel</button>
           </>
         ) : (
@@ -143,7 +147,8 @@ const TaskManager = () => {
                     <select
                       value={newTask.status}
                       onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
-                      className="w-full">
+                      className="w-full"
+                    >
                       <option value="">Select status</option>
                       <option value="Yet to Start">Yet to Start</option>
                       <option value="completed">Completed</option>
@@ -156,13 +161,13 @@ const TaskManager = () => {
                 <td className="px-4 py-2">
                   {editTask && editTask.id === task.id ? (
                     <>
-                      <button onClick={() => updateTask(task.id, newTask)} className="bg-blue-500 text-white p-2 mr-2">Save</button>
+                      <button onClick={updateTask} className="bg-blue-500 text-white p-2 mr-2">Save</button>
                       <button onClick={cancelEdit} className="bg-gray-400 text-white p-2">Cancel</button>
                     </>
                   ) : (
                     <button onClick={() => startEdit(task)} className="bg-yellow-500 text-white p-2 mr-2">Edit</button>
                   )}
-                  <button onClick={() => deleteTask(task.id)} className="bg-red-500 text-white p-2">Delete</button>
+                  <button onClick={() => { if (window.confirm('Are you sure you wish to delete this task?')) deleteTask(task.id) }} className="bg-red-500 text-white p-2">Delete</button>
                 </td>
               </tr>
             ))}

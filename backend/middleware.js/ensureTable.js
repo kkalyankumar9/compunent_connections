@@ -1,4 +1,5 @@
-const database = require("../db");
+const database = require('../db');
+const { QueryTypes } = require('sequelize');
 
 const ensureTable = async (req, res, next) => {
   console.log("Ensuring 'taskslist' table exists...");
@@ -7,11 +8,11 @@ const ensureTable = async (req, res, next) => {
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    status VARCHAR(255) 
+    status VARCHAR(255)
   )`;
 
   try {
-    await database.query(query, { type: database.QueryTypes.RAW });
+    await database.query(query, { type: QueryTypes.RAW });
     console.log("Table 'taskslist' created or already exists.");
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
