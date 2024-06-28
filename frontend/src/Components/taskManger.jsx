@@ -12,7 +12,7 @@ const TaskManager = () => {
   }, []);
 
   const fetchTasks = () => {
-    axios.get('http://localhost:8080/api/tasks')
+    axios.get('https://compunent-connections-server.onrender.com/tasks')
       .then(response => {
         setTasks(response.data);
       })
