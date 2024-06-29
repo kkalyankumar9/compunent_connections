@@ -7,7 +7,7 @@ npm run start
 ## Backend 
 npm run server
 
-This application is currently only working locally. Since I am more experienced with MongoDB than MySQL, I explored MySQL for this assignment.
+This application is currently only working locally. Since I am more experienced with MongoDB than MySQL, I explored MySQL for this assignment. I don't have knowledge of cloud MySQL
 
 ![alt text](image.png)
 
